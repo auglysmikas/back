@@ -1,23 +1,43 @@
-// const express = require('express')
-// const app = express()
-// const cors = require('cors')
-// const mainRouter = require('./router/mainRouter')
-//
-//
-// app.use(express.json())
-// app.use(cors())
-// app.listen(4000)
-//
-// app.use('/', mainRouter)
+const express = require('express')
+const app = express()
+const mongoose = require('mongoose')
+const session = require('express-session')
+require('dotenv').config()
 
 
-console.log('naujas logas')
-//
-// require('dotenv').config()
+app.use(express.json())
+app.listen(4000)
 
-// app.use(session({
-//     secret: 'keyboard cat',
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: { secure: false }
-// }))
+app.use((req, res, next) => {
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
+
+
+
+app.use(session({
+    secret: process.env.SESSION_SECREET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}))
+
+mongoose.connect(process.env.MONGO_KEY)
+    .then(()=> {
+        console.log('GOOD CONNECTION TO DATABSE')
+    }).catch(e=> {
+    console.log(e)
+    console.log('BAD CONNECTION')
+})
+
+
+const router = require('./routes/main')
+app.use('/', router)
